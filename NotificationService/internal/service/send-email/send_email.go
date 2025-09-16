@@ -23,13 +23,11 @@ func New(cfg *configs.Configs, logger *slog.Logger) *NotifyEmail{
 
 func (n *NotifyEmail) Send(to, subject, body string) error {
 	const op = "NotificationService.send-email.Send"
-	
-	_ = n.cfg
 
-	from := "balasanianraf@yandex.ru"
-	password := "tgjulhqwvgtjwups"
-	smtpHost := "smtp.yandex.ru"
-	smtpPort := "465"
+	from := n.cfg.Email.From
+	password := n.cfg.Email.Password
+	smtpHost := n.cfg.Email.SmtpHost
+	smtpPort := n.cfg.Email.SmtpPort
 	
 	msg := []byte(fmt.Sprintf(
 		"From: %s\r\n"+
@@ -40,9 +38,11 @@ func (n *NotifyEmail) Send(to, subject, body string) error {
 			"\r\n%s\r\n",
 		from, to, subject, body,
 	))
+	
+	addr := fmt.Sprintf("%s:%d", smtpHost, smtpPort)
 
 	// TLS-сессия
-	conn, err := tls.Dial("tcp", smtpHost+":"+smtpPort, &tls.Config{
+	conn, err := tls.Dial("tcp", addr, &tls.Config{
 		InsecureSkipVerify: true,
 		ServerName:         smtpHost,
 	})
