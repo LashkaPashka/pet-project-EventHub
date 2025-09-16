@@ -48,7 +48,6 @@ func main() {
 	mongoSt := mongodb.New(cfg, logger)
 
 	//TODO: init rabbitMQ
-	// TODO: init Rabbit
 	rbCli := rabbitmq.New(cfg, logger)
 
 	// TODO: init Service
