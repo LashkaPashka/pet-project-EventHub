@@ -50,7 +50,7 @@ func main() {
 	//TODO: init rabbitMQ
 	rbCli := rabbitmq.New(cfg, logger)
 
-	// TODO: init Service
+	// TODO: init service
 	service := service.New(mongoSt, redisSt, rbCli, logger, cfg)
 
 	// TODO: init kafka-client
