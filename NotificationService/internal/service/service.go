@@ -4,7 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/LashkaPashka/notification-service/internal/configs"
-	getemail "github.com/LashkaPashka/notification-service/internal/lib/get-email"
+	//getemail "github.com/LashkaPashka/notification-service/internal/lib/get-email"
 	sendemail "github.com/LashkaPashka/notification-service/internal/service/send-email"
 	sendphonenumber "github.com/LashkaPashka/notification-service/internal/service/send-phoneNumber"
 )
@@ -31,9 +31,13 @@ func New[T Notifier](notifier T, cfg *configs.Configs, logger *slog.Logger) *Ser
 
 func (s *Service[T]) NotifyAboutPaid(payload string) {
 	subject := "Notification about paid"
-	to := getemail.GetEmail([]byte(payload))
+	//to := getemail.GetEmail([]byte(payload))
+
+	to := "balasanianraf@yandex.ru"
 
 	s.logger.Debug("Prepare message")
 
-	s.notifier.Send(to, subject, payload)
+	if err := s.notifier.Send(to, subject, payload); err != nil {
+		return
+	}
 }

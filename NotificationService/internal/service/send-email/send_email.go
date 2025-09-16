@@ -1,6 +1,8 @@
 package sendemail
 
 import (
+	"crypto/tls"
+	"fmt"
 	"log/slog"
 	"net/smtp"
 
@@ -27,19 +29,67 @@ func (n *NotifyEmail) Send(to, subject, body string) error {
 	from := "balasanianraf@yandex.ru"
 	password := "tgjulhqwvgtjwups"
 	smtpHost := "smtp.yandex.ru"
-	smtpPort := "587"
+	smtpPort := "465"
 	
-	msg := []byte(body)
+	msg := []byte(fmt.Sprintf(
+		"From: %s\r\n"+
+			"To: %s\r\n"+
+			"Subject: %s\r\n"+
+			"MIME-Version: 1.0\r\n"+
+			"Content-Type: text/plain; charset=\"UTF-8\"\r\n"+
+			"\r\n%s\r\n",
+		from, to, subject, body,
+	))
 
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, msg)
+	// TLS-сессия
+	conn, err := tls.Dial("tcp", smtpHost+":"+smtpPort, &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         smtpHost,
+	})
 	if err != nil {
-		n.logger.Error("Invalid sending message on email", slog.Any("Reason: ", err), slog.String("Error: ", op))
+		n.logger.Error("TLS connect error", slog.Any("Reason", err), slog.String("Error", op))
+		return err
+	}
+	defer conn.Close()
+
+	client, err := smtp.NewClient(conn, smtpHost)
+	if err != nil {
+		n.logger.Error("SMTP client error", slog.Any("Reason", err), slog.String("Error", op))
+		return err
+	}
+	defer client.Close()
+
+	// Авторизация
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+	if err := client.Auth(auth); err != nil {
+		return err
+	}
+
+	// Адреса
+	if err := client.Mail(from); err != nil {
+		return err
+	}
+	if err := client.Rcpt(to); err != nil {
+		return err
+	}
+
+	// Тело письма
+	w, err := client.Data()
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(msg)
+	if err != nil {
+		return err
+	}
+	if err := w.Close(); err != nil {
+		return err
+	}
+
+	if err := client.Quit(); err != nil {
 		return err
 	}
 
 	n.logger.Info("Message was sent successfully on email!")
-
 	return nil
 }
