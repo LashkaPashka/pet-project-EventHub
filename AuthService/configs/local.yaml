@@ -1,0 +1,4 @@
+env: "local"
+storage_path: "postgres://postgres:root@localhost:5432/userdb"
+token_ttl: 1h
+jwt_secret: "R7q1FxEvPjZnLm1vZkD2x3lht9q4B8xJ3HVYqQ=="
