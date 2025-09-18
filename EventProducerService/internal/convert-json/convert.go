@@ -4,9 +4,9 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/LashkaPashka/event-producer/internal/convert-json/model"
-	modelforevents "github.com/LashkaPashka/event-producer/internal/convert-json/model/model-for-events"
 	"github.com/LashkaPashka/event-producer/internal/lib/random"
+	"github.com/LashkaPashka/event-producer/internal/model"
+	modelforevents "github.com/LashkaPashka/event-producer/internal/model/model-for-events"
 	"github.com/LashkaPashka/event-producer/internal/payload"
 )
 

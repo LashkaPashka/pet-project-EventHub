@@ -7,7 +7,7 @@ import (
 	"github.com/LashkaPashka/EventConsumerService/internal/lib/filter"
 	keysforredis "github.com/LashkaPashka/EventConsumerService/internal/lib/keys-for-redis"
 	"github.com/LashkaPashka/EventConsumerService/internal/lib/res"
-	"github.com/LashkaPashka/EventConsumerService/internal/service/model"
+	"github.com/LashkaPashka/EventConsumerService/internal/model"
 )
 
 type RedisStorage interface {

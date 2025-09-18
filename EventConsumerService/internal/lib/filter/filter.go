@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/LashkaPashka/EventConsumerService/internal/service/model"
+	"github.com/LashkaPashka/EventConsumerService/internal/model"
 )
 
 func FilterPostsByTag(q string, posts []model.UserPostCreated, logger *slog.Logger) []model.UserPostCreated {

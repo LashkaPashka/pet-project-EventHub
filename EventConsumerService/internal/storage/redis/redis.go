@@ -9,7 +9,7 @@ import (
 	"github.com/LashkaPashka/EventConsumerService/internal/configs"
 	"github.com/LashkaPashka/EventConsumerService/internal/lib/decode"
 	"github.com/LashkaPashka/EventConsumerService/internal/lib/encode"
-	"github.com/LashkaPashka/EventConsumerService/internal/service/model"
+	"github.com/LashkaPashka/EventConsumerService/internal/model"
 	"github.com/go-redis/redis/v8"
 )
 

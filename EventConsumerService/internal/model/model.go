@@ -3,10 +3,10 @@ package model
 import (
 	"time"
 
-	modelforevents "github.com/LashkaPashka/AnalyticsService/internal/model/model-for-events"
+	modelforevents "github.com/LashkaPashka/EventConsumerService/internal/model/model-for-events"
 )
 
-type payloadAboutEvent struct {
+type eventMetaData struct {
 	ID string 									`json:"id"`
 	Type string 								`json:"type"`
 	Timestamp time.Time 						`json:"timestamp"`
@@ -15,19 +15,20 @@ type payloadAboutEvent struct {
 }
 
 type UserPostCreated struct {
-	payloadAboutEvent
+	eventMetaData
 	DataM modelforevents.PostData 				`json:"data"`
 }
 
 type UserPostLiked struct {
-	payloadAboutEvent
+	eventMetaData
 	DataM modelforevents.LikeData 				`json:"data"`
 }
 
 type OrderPaid struct {
-	payloadAboutEvent
+	eventMetaData
 	DataM modelforevents.OrderData 				`json:"data"`
 }
+
 
 type Meta struct {
 	Trace_id string	`json:"trace_id"`

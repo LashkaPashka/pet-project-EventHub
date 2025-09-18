@@ -2,6 +2,7 @@ package modelforevents
 
 import "time"
 
+
 type PostData struct {
 	Email string  `json:"email"`
 	Title string   `json:"title"`
@@ -11,7 +12,9 @@ type PostData struct {
 }
 
 type LikeData struct {
+	PostID string `json:"post_id"`
 	Email string  `json:"email"`
+	EmailAuthor string `json:"email_author"`
 	Timestamp time.Time `json:"timestamp"`
 }
 
