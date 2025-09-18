@@ -9,8 +9,8 @@ import (
 )
 
 type Storager interface {
-	AddStat(modelforstats.UserPostsStats)
-	GetQuantityPosts(string) *modelforstats.UserPostsStats
+	AddPayload(payload any)
+	GetQuantityPosts(email string) int
 	UpdateStat(int)
 }
 
@@ -27,10 +27,10 @@ func New(storage Storager, logger *slog.Logger) *AccPosts{
 }
 
 func (a *AccPosts) AddStatsAboutPosts(payload model.UserPostCreated) {
-	var postsStats *modelforstats.UserPostsStats
+	var totalCost int
 
-	if postsStats = a.storage.GetQuantityPosts(payload.DataM.Email); postsStats == nil {
-		a.storage.AddStat(modelforstats.UserPostsStats{
+	if totalCost = a.storage.GetQuantityPosts(payload.DataM.Email); totalCost == 0 {
+		a.storage.AddPayload(modelforstats.UserPostsStats{
 			Email: payload.DataM.Email,
 			TotatPosts: 1,
 			LastPostAt: time.Now(),
@@ -40,7 +40,7 @@ func (a *AccPosts) AddStatsAboutPosts(payload model.UserPostCreated) {
 		return
 	}
 
-	newTotalPosts := postsStats.TotatPosts + 1
+	newTotalPosts := totalCost + 1
 	a.storage.UpdateStat(newTotalPosts)
 	a.logger.Info("Variable total_posts was updated successully!")
 }

@@ -41,7 +41,7 @@ func New(cfg *configs.Configs, logger *slog.Logger) *Storage {
 func (s *Storage) AddPayload(payload any) {
 	const op = "AnalyticsSerivce.storage.mysql.AddPost"
 	
-	query, args := PrepareData(payload)
+	query, args := PrepareDataForAdd(payload)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -76,7 +76,67 @@ func (s *Storage) AddPayload(payload any) {
 	}
 }
 
-func PrepareData(payload any) (string, []any) {
+func (s *Storage) GetQuantityPosts(email string) int {
+	const op = "AnlyticsService.storage.mysql.GetStats"
+
+	rows, err := s.db.Query(`SELECT total_posts FROM user_posts_stats WHERE email = ?`, email)
+	if err != nil {
+		s.logger.Error("Invalid executes query", slog.String("Error: ", op))
+		return -1
+	}
+
+	defer rows.Close()
+
+	var totalCost int
+	err = rows.Scan(&totalCost)
+	if err != nil {
+		s.logger.Error("Invalid scan the columns", slog.String("Error: ", op))
+		return -1
+	}
+
+	return totalCost
+}
+
+func (s *Storage) UpdateStatPost(updatedValue int, email string) {
+	const op = "AnalyticsSerivce.storage.mysql.AddPost"
+	
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	tx, err := s.db.Begin()
+	if err != nil {
+		s.logger.Error("Error begin transaction", slog.String("Error: ", op))
+		return
+	}
+
+	defer tx.Rollback()
+
+	stmt, err := tx.Prepare(`UPDATE user_posts_stats SET total_cost = ? where email = ?`)
+	if err != nil {
+		s.logger.Error("Error prepare transaction", slog.String("Error: ", op))
+		return
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(ctx, updatedValue, email)
+	if err != nil {
+		s.logger.Error("Error comeplete query SQL", slog.String("Error: ", op))
+		return
+	}
+
+	//id, _ := res.LastInsertId()
+
+	if err = tx.Commit(); err != nil {
+		s.logger.Error("Invalid transaction commit", slog.String("Error: ", op))
+		return
+	}
+
+
+}
+
+
+func PrepareDataForAdd(payload any) (string, []any) {
 	var query string
 	var args []any
 
