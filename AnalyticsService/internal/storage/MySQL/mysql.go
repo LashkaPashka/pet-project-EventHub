@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/LashkaPashka/AnalyticsService/internal/configs"
-	"github.com/LashkaPashka/AnalyticsService/internal/model"
+	modelforstats "github.com/LashkaPashka/AnalyticsService/internal/model/model-for-stats"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -38,8 +38,10 @@ func New(cfg *configs.Configs, logger *slog.Logger) *Storage {
 	}
 }
 
-func (s *Storage) AddPost(payload model.UserPostCreated) {
+func (s *Storage) AddPayload(payload any) {
 	const op = "AnalyticsSerivce.storage.mysql.AddPost"
+	
+	query, args := PrepareData(payload)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -52,7 +54,7 @@ func (s *Storage) AddPost(payload model.UserPostCreated) {
 
 	defer tx.Rollback()
 
-	stmt, err := tx.Prepare(`INSERT INTO user_posts_stats(email, total_posts, last_post_at) VALUES (?, ?, ?)`)
+	stmt, err := tx.Prepare(query)
 	if err != nil {
 		s.logger.Error("Error prepare transaction", slog.String("Error: ", op))
 		return
@@ -60,7 +62,7 @@ func (s *Storage) AddPost(payload model.UserPostCreated) {
 
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx)
+	_, err = stmt.ExecContext(ctx, args...)
 	if err != nil {
 		s.logger.Error("Error comeplete query SQL", slog.String("Error: ", op))
 		return
@@ -72,5 +74,23 @@ func (s *Storage) AddPost(payload model.UserPostCreated) {
 		s.logger.Error("Invalid transaction commit", slog.String("Error: ", op))
 		return
 	}
+}
 
+func PrepareData(payload any) (string, []any) {
+	var query string
+	var args []any
+
+	switch v := payload.(type) {
+		case modelforstats.UserPostsStats:
+			query = `INSERT INTO user_posts_stats(email, total_posts, last_post_at) VALUES (?, ?, ?)`
+			args = append(args, v.Email, v.TotatPosts, v.LastPostAt)
+		case modelforstats.PostLikesAt:
+			query = `INSERT INTO posts_likes_stats(post_id, email, total_likes, last_liked_at) VALUES (?, ?, ?, ?)`
+			args = append(args, v.PostID, v.Email, v.TotalLikes, v.LastLikedAt)
+		case modelforstats.UserOrdersStats:
+			query = `INSERT INTO user_orders_stats(email, total_orders, total_amount, last_order_at) VALUES (?, ?, ?, ?)`
+			args = append(args, v.Email, v.TotalOrders, v.TotalAmmount, v.LastOrderAt)
+	}
+
+	return  query, args
 }
